@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediQueue - Appointment Requests</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --gray-color: #95a5a6;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar (same as previous screens) */
+        .sidebar {
+            width: 250px;
+            background-color: var(--dark-color);
+            color: white;
+            padding: 20px 0;
+        }
+        
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar-header img {
+            width: 40px;
+            margin-right: 10px;
+        }
+        
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+        
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+        
+        .menu-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .menu-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            margin: 0;
+            color: var(--dark-color);
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        /* Appointment Requests Styles */
+        .appointment-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .appointment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .appointment-header h2 {
+            margin: 0;
+            color: var(--dark-color);
+        }
+        
+        .filter-options {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .filter-btn {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .filter-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .appointment-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .appointment-item {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .appointment-item:last-child {
+            border-bottom: none;
+        }
+        
+        .appointment-details {
+            flex: 1;
+        }
+        
+        .appointment-patient {
+            font-weight: 500;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .appointment-meta {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+            color: var(--gray-color);
+            margin-bottom: 5px;
+        }
+        
+        .appointment-purpose {
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .appointment-status {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-confirmed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .appointment-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-accept {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .btn-accept:hover {
+            background-color: #218838;
+        }
+        
+        .btn-reject {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        .btn-reject:hover {
+            background-color: #c82333;
+        }
+        
+        .btn-view {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-view:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .no-appointments {
+            text-align: center;
+            padding: 40px;
+            color: var(--gray-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar (same as previous screens) -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <img src="mediqueue-logo-icon.png" alt="MediQueue Icon">
+                <h2>MediQueue Clinic</h2>
+            </div>
+            
+            <div class="sidebar-menu">
+                <div class="menu-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-users"></i>
+                    <span>Queue Management</span>
+                </div>
+                <div class="menu-item active">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Appointments</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-user-md"></i>
+                    <span>Doctors</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Reports</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1>Appointment Requests</h1>
+                <div class="user-profile">
+                    <img src="clinic-avatar.jpg" alt="Clinic Admin">
+                    <span>Dr. Smith's Clinic</span>
+                </div>
+            </div>
+            
+            <div class="appointment-container">
+                <div class="appointment-header">
+                    <h2>Today's Appointments (5)</h2>
+                    <div class="filter-options">
+                        <button class="filter-btn active">All</button>
+                        <button class="filter-btn">Pending</button>
+                        <button class="filter-btn">Confirmed</button>
+                        <button class="filter-btn">Cancelled</button>
+                    </div>
+                </div>
+                
+                <ul class="appointment-list">
+                    <li class="appointment-item">
+                        <div class="appointment-details">
+                            <div class="appointment-patient">Michael Brown</div>
+                            <div class="appointment-meta">
+                                <span><i class="far fa-clock"></i> 10:00 AM - 10:30 AM</span>
+                                <span><i class="fas fa-user-md"></i> Dr. Smith</span>
+                                <span class="appointment-status status-pending">Pending</span>
+                            </div>
+                            <div class="appointment-purpose">General checkup and consultation</div>
+                        </div>
+                        <div class="appointment-actions">
+                            <button class="btn btn-accept">Accept</button>
+                            <button class="btn btn-reject">Reject</button>
+                            <button class="btn btn-view">View</button>
+                        </div>
+                    </li>
+                    
+                    <li class="appointment-item">
+                        <div class="appointment-details">
+                            <div class="appointment-patient">Sarah Johnson</div>
+                            <div class="appointment-meta">
+                                <span><i class="far fa-clock"></i> 11:15 AM - 11:45 AM</span>
+                                <span><i class="fas fa-user-md"></i> Dr. Wilson</span>
+                                <span class="appointment-status status-confirmed">Confirmed</span>
+                            </div>
+                            <div class="appointment-purpose">Follow-up appointment</div>
+                        </div>
+                        <div class="appointment-actions">
+                            <button class="btn btn-view">View</button>
+                        </div>
+                    </li>
+                    
+                    <li class="appointment-item">
+                        <div class="appointment-details">
+                            <div class="appointment-patient">Robert Taylor</div>
+                            <div class="appointment-meta">
+                                <span><i class="far fa-clock"></i> 1:30 PM - 2:00 PM</span>
+                                <span><i class="fas fa-user-md"></i> Dr. Smith</span>
+                                <span class="appointment-status status-pending">Pending</span>
+                            </div>
+                            <div class="appointment-purpose">Dental checkup</div>
+                        </div>
+                        <div class="appointment-actions">
+                            <button class="btn btn-accept">Accept</button>
+                            <button class="btn btn-reject">Reject</button>
+                            <button class="btn btn-view">View</button>
+                        </div>
+                    </li>
+                    
+                    <li class="appointment-item">
+                        <div class="appointment-details">
+                            <div class="appointment-patient">Emily Davis</div>
+                            <div class="appointment-meta">
+                                <span><i class="far fa-clock"></i> 2:45 PM - 3:15 PM</span>
+                                <span><i class="fas fa-user-md"></i> Dr. Johnson</span>
+                                <span class="appointment-status status-confirmed">Confirmed</span>
+                            </div>
+                            <div class="appointment-purpose">Annual physical examination</div>
+                        </div>
+                        <div class="appointment-actions">
+                            <button class="btn btn-view">View</button>
+                        </div>
+                    </li>
+                    
+                    <li class="appointment-item">
+                        <div class="appointment-details">
+                            <div class="appointment-patient">David Wilson</div>
+                            <div class="appointment-meta">
+                                <span><i class="far fa-clock"></i> 4:00 PM - 4:30 PM</span>
+                                <span><i class="fas fa-user-md"></i> Dr. Smith</span>
+                                <span class="appointment-status status-cancelled">Cancelled</span>
+                            </div>
+                            <div class="appointment-purpose">Consultation for back pain</div>
+                        </div>
+                        <div class="appointment-actions">
+                            <button class="btn btn-view">View</button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Filter functionality
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // In a real app, this would filter the appointment list
+                console.log('Filter by:', this.textContent);
+            });
+        });
+        
+        // Appointment action buttons
+        document.querySelectorAll('.btn-accept').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (confirm('Accept this appointment?')) {
+                    alert('Appointment accepted and confirmed');
+                    // Update status in UI and send to backend
+                }
+            });
+        });
+        
+        document.querySelectorAll('.btn-reject').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (confirm('Reject this appointment?')) {
+                    alert('Appointment rejected');
+                    // Update status in UI and send to backend
+                }
+            });
+        });
+        
+        document.querySelectorAll('.btn-view').forEach(btn => {
+            btn.addEventListener('click', function() {
+                console.log('View appointment details');
+                // Open modal or navigate to details page
+            });
+        });
+    </script>
+</body>
+</html>

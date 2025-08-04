@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediQueue - Queue Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --gray-color: #95a5a6;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar Styles (same as dashboard) */
+        .sidebar {
+            width: 250px;
+            background-color: var(--dark-color);
+            color: white;
+            padding: 20px 0;
+        }
+        
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar-header img {
+            width: 40px;
+            margin-right: 10px;
+        }
+        
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+        
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+        
+        .menu-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .menu-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            margin: 0;
+            color: var(--dark-color);
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        /* Queue Management Styles */
+        .queue-container {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .current-patient {
+            flex: 1;
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        
+        .current-patient h2 {
+            margin-top: 0;
+            color: var(--dark-color);
+        }
+        
+        .token-display {
+            font-size: 72px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 20px 0;
+        }
+        
+        .patient-info {
+            background-color: var(--light-color);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .patient-info p {
+            margin: 10px 0;
+        }
+        
+        .patient-name {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e67e22;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .waiting-list {
+            flex: 1;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .waiting-list h2 {
+            margin-top: 0;
+            color: var(--dark-color);
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .queue-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .queue-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .queue-item:last-child {
+            border-bottom: none;
+        }
+        
+        .queue-item.active {
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+        
+        .queue-item .token {
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 18px;
+        }
+        
+        .queue-item .patient {
+            flex: 1;
+            margin-left: 20px;
+        }
+        
+        .queue-item .patient-name {
+            font-weight: 500;
+        }
+        
+        .queue-item .patient-time {
+            font-size: 12px;
+            color: var(--gray-color);
+        }
+        
+        .queue-item .actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .queue-item .btn-sm {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+        
+        .no-patients {
+            text-align: center;
+            padding: 30px;
+            color: var(--gray-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar (same as dashboard) -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <img src="mediqueue-logo-icon.png" alt="MediQueue Icon">
+                <h2>MediQueue Clinic</h2>
+            </div>
+            
+            <div class="sidebar-menu">
+                <div class="menu-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </div>
+                <div class="menu-item active">
+                    <i class="fas fa-users"></i>
+                    <span>Queue Management</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Appointments</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-user-md"></i>
+                    <span>Doctors</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Reports</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1>Queue Management</h1>
+                <div class="user-profile">
+                    <img src="clinic-avatar.jpg" alt="Clinic Admin">
+                    <span>Dr. Smith's Clinic</span>
+                </div>
+            </div>
+            
+            <div class="queue-container">
+                <!-- Current Patient Section -->
+                <div class="current-patient">
+                    <h2>Currently Serving</h2>
+                    <div class="token-display">A-12</div>
+                    
+                    <div class="patient-info">
+                        <p class="patient-name">Sarah Johnson</p>
+                        <p><strong>Appointment:</strong> General Checkup</p>
+                        <p><strong>Doctor:</strong> Dr. Smith</p>
+                        <p><strong>Wait Time:</strong> 15 minutes</p>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" id="nextPatientBtn">
+                            <i class="fas fa-forward"></i> Next Patient
+                        </button>
+                        <button class="btn btn-warning" id="skipPatientBtn">
+                            <i class="fas fa-step-forward"></i> Skip
+                        </button>
+                        <button class="btn btn-danger" id="cancelPatientBtn">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Waiting List Section -->
+                <div class="waiting-list">
+                    <h2>Waiting List (8)</h2>
+                    
+                    <ul class="queue-list">
+                        <li class="queue-item active">
+                            <span class="token">A-13</span>
+                            <div class="patient">
+                                <div class="patient-name">Michael Brown</div>
+                                <div class="patient-time">Arrived 5 min ago</div>
+                            </div>
+                            <div class="actions">
+                                <button class="btn btn-primary btn-sm">Start</button>
+                                <button class="btn btn-danger btn-sm">Remove</button>
+                            </div>
+                        </li>
+                        <li class="queue-item">
+                            <span class="token">A-14</span>
+                            <div class="patient">
+                                <div class="patient-name">Emily Davis</div>
+                                <div class="patient-time">Arrived 10 min ago</div>
+                            </div>
+                            <div class="actions">
+                                <button class="btn btn-primary btn-sm">Start</button>
+                                <button class="btn btn-danger btn-sm">Remove</button>
+                            </div>
+                        </li>
+                        <li class="queue-item">
+                            <span class="token">A-15</span>
+                            <div class="patient">
+                                <div class="patient-name">Robert Wilson</div>
+                                <div class="patient-time">Arrived 15 min ago</div>
+                            </div>
+                            <div class="actions">
+                                <button class="btn btn-primary btn-sm">Start</button>
+                                <button class="btn btn-danger btn-sm">Remove</button>
+                            </div>
+                        </li>
+                        <li class="queue-item">
+                            <span class="token">B-01</span>
+                            <div class="patient">
+                                <div class="patient-name">Jennifer Lee</div>
+                                <div class="patient-time">Arrived 20 min ago</div>
+                            </div>
+                            <div class="actions">
+                                <button class="btn btn-primary btn-sm">Start</button>
+                                <button class="btn btn-danger btn-sm">Remove</button>
+                            </div>
+                        </li>
+                        <li class="queue-item">
+                            <span class="token">B-02</span>
+                            <div class="patient">
+                                <div class="patient-name">David Miller</div>
+                                <div class="patient-time">Arrived 25 min ago</div>
+                            </div>
+                            <div class="actions">
+                                <button class="btn btn-primary btn-sm">Start</button>
+                                <button class="btn btn-danger btn-sm">Remove</button>
+                            </div>
+                        </li>
+                        <li class="queue-item">
+                            <span class="token">B-03</span>
+                            <div class="patient">
+                                <div class="patient-name">Lisa Taylor</div>
+                                <div class="patient-time">Arrived 30 min ago</div>
+                            </div>
+                            <div class="actions">
+                                <button class="btn btn-primary btn-sm">Start</button>
+                                <button class="btn btn-danger btn-sm">Remove</button>
+                            </div>
+                        </li>
+                        <li class="queue-item">
+                            <span class="token">B-04</span>
+                            <div class="patient">
+                                <div class="patient-name">James Anderson</div>
+                                <div class="patient-time">Arrived 35 min ago</div>
+                            </div>
+                            <div class="actions">
+                                <button class="btn btn-primary btn-sm">Start</button>
+                                <button class="btn btn-danger btn-sm">Remove</button>
+                            </div>
+                        </li>
+                        <li class="queue-item">
+                            <span class="token">B-05</span>
+                            <div class="patient">
+                                <div class="patient-name">Patricia Thomas</div>
+                                <div class="patient-time">Arrived 40 min ago</div>
+                            </div>
+                            <div class="actions">
+                                <button class="btn btn-primary btn-sm">Start</button>
+                                <button class="btn btn-danger btn-sm">Remove</button>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // In a real application, this would be connected to your backend
+        document.getElementById('nextPatientBtn').addEventListener('click', function() {
+            alert('Moving to next patient in queue...');
+            // This would update the queue in real-time
+        });
+        
+        document.getElementById('skipPatientBtn').addEventListener('click', function() {
+            if (confirm('Are you sure you want to skip this patient?')) {
+                alert('Patient skipped and moved to end of queue');
+            }
+        });
+        
+        document.getElementById('cancelPatientBtn').addEventListener('click', function() {
+            if (confirm('Are you sure you want to cancel this patient?')) {
+                alert('Patient removed from queue');
+            }
+        });
+        
+        // This would be WebSocket or polling in a real app to update the queue in real-time
+        // setInterval(updateQueue, 5000); // Update every 5 seconds
+        
+        function updateQueue() {
+            console.log('Updating queue data...');
+            // Fetch new queue data from server
+        }
+    </script>
+</body>
+</html>

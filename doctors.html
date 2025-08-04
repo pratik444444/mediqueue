@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediQueue - Doctor Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --gray-color: #95a5a6;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar (same as previous screens) */
+        .sidebar {
+            width: 250px;
+            background-color: var(--dark-color);
+            color: white;
+            padding: 20px 0;
+        }
+        
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar-header img {
+            width: 40px;
+            margin-right: 10px;
+        }
+        
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+        
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+        
+        .menu-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .menu-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            margin: 0;
+            color: var(--dark-color);
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        /* Doctor Management Styles */
+        .doctor-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .doctor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .doctor-header h2 {
+            margin: 0;
+            color: var(--dark-color);
+        }
+        
+        .search-add {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .search-box {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 200px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .doctor-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .doctor-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .doctor-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .doctor-info {
+            flex: 1;
+        }
+        
+        .doctor-name {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .doctor-specialty {
+            color: var(--primary-color);
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .doctor-schedule {
+            font-size: 13px;
+            color: var(--gray-color);
+            margin-bottom: 10px;
+        }
+        
+        .doctor-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+        
+        .btn-edit {
+            background-color: var(--warning-color);
+            color: white;
+        }
+        
+        .btn-edit:hover {
+            background-color: #e67e22;
+        }
+        
+        .btn-delete {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background-color: #c0392b;
+        }
+        
+        .no-doctors {
+            text-align: center;
+            padding: 40px;
+            color: var(--gray-color);
+            grid-column: 1 / -1;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            width: 500px;
+            max-width: 90%;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            color: var(--dark-color);
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--gray-color);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar (same as previous screens) -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <img src="mediqueue-logo-icon.png" alt="MediQueue Icon">
+                <h2>MediQueue Clinic</h2>
+            </div>
+            
+            <div class="sidebar-menu">
+                <div class="menu-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-users"></i>
+                    <span>Queue Management</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Appointments</span>
+                </div>
+                <div class="menu-item active">
+                    <i class="fas fa-user-md"></i>
+                    <span>Doctors</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Reports</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1>Doctor Management</h1>
+                <div class="user-profile">
+                    <img src="clinic-avatar.jpg" alt="Clinic Admin">
+                    <span>Dr. Smith's Clinic</span>
+                </div>
+            </div>
+            
+            <div class="doctor-container">
+                <div class="doctor-header">
+                    <h2>All Doctors (4)</h2>
+                    <div class="search-add">
+                        <input type="text" class="search-box" placeholder="Search doctors...">
+                        <button class="btn btn-primary" id="addDoctorBtn">
+                            <i class="fas fa-plus"></i> Add Doctor
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="doctor-list">
+                    <div class="doctor-card">
+                        <img src="doctor1.jpg" alt="Dr. Smith" class="doctor-avatar">
+                        <div class="doctor-info">
+                            <div class="doctor-name">Dr. John Smith</div>
+                            <div class="doctor-specialty">General Practitioner</div>
+                            <div class="doctor-schedule">
+                                <div><strong>Schedule:</strong> Mon-Fri, 9AM-5PM</div>
+                                <div><strong>Current Status:</strong> On Duty</div>
+                            </div>
+                            <div class="doctor-actions">
+                                <button class="btn btn-sm btn-edit">Edit</button>
+                                <button class="btn btn-sm btn-delete">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="doctor-card">
+                        <img src="doctor2.jpg" alt="Dr. Wilson" class="doctor-avatar">
+                        <div class="doctor-info">
+                            <div class="doctor-name">Dr. Emily Wilson</div>
+                            <div class="doctor-specialty">Pediatrician</div>
+                            <div class="doctor-schedule">
+                                <div><strong>Schedule:</strong> Tue-Thu, 10AM-4PM</div>
+                                <div><strong>Current Status:</strong> On Duty</div>
+                            </div>
+                            <div class="doctor-actions">
+                                <button class="btn btn-sm btn-edit">Edit</button>
+                                <button class="btn btn-sm btn-delete">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="doctor-card">
+                        <img src="doctor3.jpg" alt="Dr. Johnson" class="doctor-avatar">
+                        <div class="doctor-info">
+                            <div class="doctor-name">Dr. Robert Johnson</div>
+                            <div class="doctor-specialty">ENT Specialist</div>
+                            <div class="doctor-schedule">
+                                <div><strong>Schedule:</strong> Mon-Wed-Fri, 8AM-2PM</div>
+                                <div><strong>Current Status:</strong> Off Duty</div>
+                            </div>
+                            <div class="doctor-actions">
+                                <button class="btn btn-sm btn-edit">Edit</button>
+                                <button class="btn btn-sm btn-delete">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="doctor-card">
+                        <img src="doctor4.jpg" alt="Dr. Lee" class="doctor-avatar">
+                        <div class="doctor-info">
+                            <div class="doctor-name">Dr. Jennifer Lee</div>
+                            <div class="doctor-specialty">Dentist</div>
+                            <div class="doctor-schedule">
+                                <div><strong>Schedule:</strong> Thu-Sat, 11AM-7PM</div>
+                                <div><strong>Current Status:</strong> On Leave</div>
+                            </div>
+                            <div class="doctor-actions">
+                                <button class="btn btn-sm btn-edit">Edit</button>
+                                <button class="btn btn-sm btn-delete">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add/Edit Doctor Modal -->
+    <div class="modal" id="doctorModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Doctor</h3>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
+            </div>
+            
+            <form id="doctorForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="doctorFirstName">First Name</label>
+                        <input type="text" id="doctorFirstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="doctorLastName">Last Name</label>
+                        <input type="text" id="doctorLastName" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="doctorSpecialty">Specialty</label>
+                    <select id="doctorSpecialty" required>
+                        <option value="">Select specialty</option>
+                        <option value="General Practitioner">General Practitioner</option>
+                        <option value="Pediatrician">Pediatrician</option>
+                        <option value="ENT Specialist">ENT Specialist</option>
+                        <option value="Dentist">Dentist</option>
+                        <option value="Cardiologist">Cardiologist</option>
+                        <option value="Dermatologist">Dermatologist</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="doctorEmail">Email</label>
+                    <input type="email" id="doctorEmail" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="doctorPhone">Phone Number</label>
+                    <input type="tel" id="doctorPhone" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="doctorSchedule">Schedule</label>
+                    <textarea id="doctorSchedule" rows="3" placeholder="e.g. Mon-Fri, 9AM-5PM"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="doctorStatus">Current Status</label>
+                    <select id="doctorStatus">
+                        <option value="On Duty">On Duty</option>
+                        <option value="Off Duty">Off Duty</option>
+                        <option value="On Leave">On Leave</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="doctorPhoto">Photo</label>
+                    <input type="file" id="doctorPhoto">
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn" id="cancelDoctorBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Doctor</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Modal functionality
+        const modal = document.getElementById('doctorModal');
+        const addDoctorBtn = document.getElementById('addDoctorBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const cancelDoctorBtn = document.getElementById('cancelDoctorBtn');
+        
+        addDoctorBtn.addEventListener('click', function() {
+            modal.style.display = 'flex';
+            document.getElementById('doctorForm').reset();
+            document.querySelector('.modal-header h3').textContent = 'Add New Doctor';
+        });
+        
+        closeModalBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+        
+        cancelDoctorBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+        
+        // Form submission
+        document.getElementById('doctorForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Doctor information saved successfully!');
+            modal.style.display = 'none';
+            // In a real app, you would send this data to your backend
+        });
+        
+        // Edit doctor buttons
+        document.querySelectorAll('.btn-edit').forEach(btn => {
+            btn.addEventListener('click', function() {
+                modal.style.display = 'flex';
+                document.querySelector('.modal-header h3').textContent = 'Edit Doctor';
+                // In a real app, you would populate the form with existing doctor data
+            });
+        });
+        
+        // Delete doctor buttons
+        document.querySelectorAll('.btn-delete').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (confirm('Are you sure you want to delete this doctor?')) {
+                    alert('Doctor deleted successfully');
+                    // In a real app, you would remove the doctor from the backend
+                }
+            });
+        });
+        
+        // Search functionality
+        document.querySelector('.search-box').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            console.log('Searching for:', searchTerm);
+            // In a real app, you would filter the doctor list
+        });
+    </script>
+</body>
+</html>
